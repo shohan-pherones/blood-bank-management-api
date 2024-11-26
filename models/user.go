@@ -12,7 +12,7 @@ const (
 	Recipient UserRole = "recipient"
 )
 
-type User struct {
+type UserModel struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	FirstName string             `bson:"first_name" json:"first_name"`
 	LastName  string             `bson:"last_name" json:"last_name"`
