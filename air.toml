@@ -1,0 +1,50 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/app ./main.go"
+  dir = "."
+  build_on_start = true
+  no_rebuild_on_start = false
+
+[watch]
+  include = [
+    "**/*.go",
+    "**/*.html",
+    "**/*.css",
+    "**/*.js"
+  ]
+  exclude = [
+    "tmp/*",
+    "vendor/*",
+    "node_modules/*"
+  ]
+
+[run]
+  cmd = "./tmp/app"
+  args = []
+
+[log]
+  level = "info"
+  path = "tmp/air.log"
+
+[watchdog]
+  interval = 1000
+
+[build.files]
+  include = [
+    "*.go",
+    "config/**/*.go",
+    "controllers/**/*.go",
+    "database/**/*.go",
+    "middleware/**/*.go",
+    "models/**/*.go",
+    "routes/**/*.go",
+    "services/**/*.go",
+    "utils/**/*.go"
+  ]
+  exclude = [
+    "tmp/*",
+    "vendor/*",
+    "node_modules/*"
+  ]
