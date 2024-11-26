@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"github.com/shohan-pherones/blood-bank-management.git/database"
 	"github.com/shohan-pherones/blood-bank-management.git/utils"
@@ -19,6 +20,8 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	app.Use(logger.New())
 
 	database.ConnectToMongoDB()
 
