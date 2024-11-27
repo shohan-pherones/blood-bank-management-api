@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"github.com/shohan-pherones/blood-bank-management.git/database"
+	"github.com/shohan-pherones/blood-bank-management.git/routes"
 	"github.com/shohan-pherones/blood-bank-management.git/utils"
 )
 
@@ -24,6 +25,10 @@ func main() {
 	app.Use(logger.New())
 
 	database.ConnectToMongoDB()
+
+	api := routes.MainAPIEndpoint(app)
+
+	routes.RegisterUserRoutes(api)
 
 	app.Get("/api/v1/health", func(c *fiber.Ctx) error {
 		return utils.SendResponse(c, fiber.StatusOK, "Server is running healthy!", nil)

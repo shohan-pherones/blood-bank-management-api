@@ -11,7 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var Database *mongo.Database
+var (
+	Client   *mongo.Client
+	Database *mongo.Database
+	UserColl *mongo.Collection
+)
 
 func ConnectToMongoDB() {
 	uri := os.Getenv("MONGO_URI")
@@ -32,5 +36,6 @@ func ConnectToMongoDB() {
 	}
 
 	Database = client.Database("blood-bank-management")
+	UserColl = Database.Collection("users")
 	fmt.Println("Connected to MongoDB successfully")
 }
