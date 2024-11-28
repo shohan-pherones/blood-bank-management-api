@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"os"
 	"strings"
 
@@ -12,11 +13,11 @@ func AuthMiddleware(expectedRoles []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			return utils.SendError(c, fiber.StatusUnauthorized, "Authorization header is missing", nil)
+			return utils.SendError(c, fiber.StatusUnauthorized, "authorization header is missing", nil)
 		}
 
 		if !strings.HasPrefix(authHeader, "Bearer ") {
-			return utils.SendError(c, fiber.StatusUnauthorized, "Invalid token format", nil)
+			return utils.SendError(c, fiber.StatusUnauthorized, "invalid token format", nil)
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
@@ -24,25 +25,35 @@ func AuthMiddleware(expectedRoles []string) fiber.Handler {
 		accessSecret := os.Getenv("JWT_ACCESS_SECRET")
 		claims, err := utils.VerifyToken(tokenString, accessSecret)
 		if err != nil {
-			return utils.SendError(c, fiber.StatusUnauthorized, "Invalid or expired access token", err)
+			return utils.SendError(c, fiber.StatusUnauthorized, "invalid or expired access token", err)
 		}
 
-		userRole := claims["role"].(string)
+		log.Print(claims)
+
+		userRole, ok := claims["role"]
+		if !ok {
+			return utils.SendError(c, fiber.StatusForbidden, "invalid token: role missing", nil)
+		}
+
+		roleStr, ok := userRole.(string)
+		if !ok {
+			return utils.SendError(c, fiber.StatusForbidden, "invalid token: role is invalid", nil)
+		}
 
 		roleMatch := false
 		for _, role := range expectedRoles {
-			if userRole == role {
+			if roleStr == role {
 				roleMatch = true
 				break
 			}
 		}
 
 		if !roleMatch {
-			return utils.SendError(c, fiber.StatusForbidden, "You do not have the required permissions", nil)
+			return utils.SendError(c, fiber.StatusForbidden, "you do not have the required permissions", nil)
 		}
 
 		c.Locals("userID", claims["user_id"])
-		c.Locals("role", claims["role"])
+		c.Locals("role", roleStr)
 
 		return c.Next()
 	}
