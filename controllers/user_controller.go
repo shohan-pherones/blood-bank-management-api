@@ -28,7 +28,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		return utils.SendError(c, fiber.StatusInternalServerError, "invalid access token expiry duration", err)
 	}
 
-	accessToken, err := utils.CreateToken(user.ID.Hex(), accessSecret, expiryDuration)
+	accessToken, err := utils.CreateToken(user.ID.Hex(), string(user.Role), accessSecret, expiryDuration)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "failed to create access token", err)
 	}
@@ -40,7 +40,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		return utils.SendError(c, fiber.StatusInternalServerError, "invalid refresh token expiry duration", err)
 	}
 
-	refreshToken, err := utils.CreateToken(user.ID.Hex(), refreshSecret, refreshExpiryDuration)
+	refreshToken, err := utils.CreateToken(user.ID.Hex(), string(user.Role), refreshSecret, refreshExpiryDuration)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "failed to create refresh token", err)
 	}
@@ -86,7 +86,7 @@ func LoginUser(c *fiber.Ctx) error {
 		return utils.SendError(c, fiber.StatusInternalServerError, "invalid access token expiry duration", err)
 	}
 
-	accessToken, err := utils.CreateToken(user.ID.Hex(), accessSecret, expiryDuration)
+	accessToken, err := utils.CreateToken(user.ID.Hex(), string(user.Role), accessSecret, expiryDuration)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "failed to create access token", err)
 	}
@@ -98,7 +98,7 @@ func LoginUser(c *fiber.Ctx) error {
 		return utils.SendError(c, fiber.StatusInternalServerError, "invalid refresh token expiry duration", err)
 	}
 
-	refreshToken, err := utils.CreateToken(user.ID.Hex(), refreshSecret, refreshExpiryDuration)
+	refreshToken, err := utils.CreateToken(user.ID.Hex(), string(user.Role), refreshSecret, refreshExpiryDuration)
 	if err != nil {
 		return utils.SendError(c, fiber.StatusInternalServerError, "failed to create refresh token", err)
 	}
@@ -118,4 +118,34 @@ func LoginUser(c *fiber.Ctx) error {
 	}
 
 	return utils.SendResponse(c, fiber.StatusOK, "login successful", data)
+}
+
+func GetUsers(c *fiber.Ctx) error {
+	userService := services.UserService{}
+	users, err := userService.GetUsers()
+	if err != nil {
+		return utils.SendError(c, fiber.StatusInternalServerError, "failed to retrieve users", err)
+	}
+
+	data := fiber.Map{
+		"users": users,
+	}
+
+	return utils.SendResponse(c, fiber.StatusOK, "users fetched successfully", data)
+}
+
+func GetUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+
+	userService := services.UserService{}
+	user, err := userService.GetUser(userID)
+	if err != nil {
+		return utils.SendError(c, fiber.StatusNotFound, "user not found", err)
+	}
+
+	data := fiber.Map{
+		"user": user,
+	}
+
+	return utils.SendResponse(c, fiber.StatusOK, "user fetched successfully", data)
 }

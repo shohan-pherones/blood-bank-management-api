@@ -7,11 +7,12 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func CreateToken(userID, secret string, expiry time.Duration) (string, error) {
+func CreateToken(userID, role, secret string, expiry time.Duration) (string, error) {
 	expirationTime := time.Now().Add(expiry)
 
 	claims := jwt.MapClaims{
 		"user_id": userID,
+		"role":    role,
 		"exp":     expirationTime.Unix(),
 		"iat":     time.Now().Unix(),
 	}

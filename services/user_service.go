@@ -79,3 +79,45 @@ func (us *UserService) LoginUser(email, password string) (*models.UserModel, err
 
 	return &user, nil
 }
+
+func (us *UserService) GetUsers() ([]models.UserModel, error) {
+	var users []models.UserModel
+	cursor, err := database.UserColl.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return nil, errors.New("failed to query the database")
+	}
+	defer cursor.Close(context.TODO())
+
+	for cursor.Next(context.TODO()) {
+		var user models.UserModel
+		if err := cursor.Decode(&user); err != nil {
+			return nil, errors.New("failed to decode user")
+		}
+		users = append(users, user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, errors.New("error while iterating over database cursor")
+	}
+
+	return users, nil
+}
+
+func (us *UserService) GetUser(userID string) (*models.UserModel, error) {
+	var user models.UserModel
+
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, errors.New("invalid user ID format")
+	}
+
+	err = database.UserColl.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("user not found")
+		}
+		return nil, errors.New("failed to query the database")
+	}
+
+	return &user, nil
+}
