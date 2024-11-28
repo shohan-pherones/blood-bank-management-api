@@ -9,4 +9,5 @@ func RegisterUserRoutes(api fiber.Router) {
 	user := api.Group("/users")
 
 	user.Post("/register", controllers.RegisterUser)
+	user.Post("/login", controllers.LoginUser)
 }

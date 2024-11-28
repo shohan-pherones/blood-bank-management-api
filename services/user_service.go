@@ -10,6 +10,7 @@ import (
 	"github.com/shohan-pherones/blood-bank-management.git/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserService struct{}
@@ -56,4 +57,25 @@ func (us *UserService) RegisterUser(user *models.UserModel) error {
 	}
 
 	return nil
+}
+
+func (us *UserService) LoginUser(email, password string) (*models.UserModel, error) {
+	if !utils.ValidateEmail(email) {
+		return nil, errors.New("invalid email format")
+	}
+
+	var user models.UserModel
+	err := database.UserColl.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("user not found")
+		}
+		return nil, errors.New("failed to query the database")
+	}
+
+	if !utils.CheckPasswordHash(password, user.Password) {
+		return nil, errors.New("invalid password")
+	}
+
+	return &user, nil
 }
